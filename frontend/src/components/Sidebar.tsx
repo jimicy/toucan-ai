@@ -1,6 +1,7 @@
 import AssistantIcon from "@mui/icons-material/Assistant";
 
 import "./Sidebar.css";
+import {PUBLIC_URL} from '../App'
 
 export default function Sidebar(props: {
   models: Array<{ name: string; displayName: string }>;
@@ -19,15 +20,13 @@ export default function Sidebar(props: {
       props.setOpenAIKey(key);
     }
   };
-  // eslint-disable-next-line no-restricted-globals
-  const ORIGIN_URL = location.origin;
 
   return (
     <>
       <div className="sidebar">
         <div className="logo">
-          <img src={`${ORIGIN_URL}/toucan_logo.svg`} alt="toucan logo" />
-          <div>Tucan</div>
+          <img src={`${PUBLIC_URL}/toucan_logo.svg`} alt="toucan logo" />
+          TOUCAN
           <div className="github">
             <a href="https://github.com/jimicy/toucan-ai">Open Source</a>
           </div>

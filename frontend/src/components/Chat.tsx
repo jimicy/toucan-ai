@@ -1,10 +1,9 @@
 import "./Chat.css";
 
-import VoiceChatIcon from "@mui/icons-material/VoiceChat";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import PersonIcon from "@mui/icons-material/Person";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import { API_ADDRESS, MessageDict } from "../App";
+import { API_ADDRESS, MessageDict, PUBLIC_URL } from "../App";
 
 import { RefObject } from "react";
 import IconButton from "@mui/material/IconButton";
@@ -70,7 +69,7 @@ function Message(props: {
     <div className={"message " + (role == "system" ? "system" : "user")}>
       <div className="avatar-holder">
         <div className="avatar">
-          {role == "system" ? <VoiceChatIcon /> : <PersonIcon />}
+          {role == "system" ? <img id="system_icon" src={`${PUBLIC_URL}/toucan_logoWhite.svg`} alt="toucan logo" /> : <PersonIcon />}
         </div>
       </div>
       <div className="message-body">

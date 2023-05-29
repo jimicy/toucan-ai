@@ -1,5 +1,12 @@
 div.message.system {
-    background: rgba(247,247,248);
+    font-family: 'Inter';
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(0.06rem);
+    -webkit-backdrop-filter: blur(0.06rem);
+    border: 1px solid rgba(186, 186, 186, 0.27);
+    padding: 2rem;
 }
 
 div.avatar {
@@ -32,6 +39,7 @@ div.message {
     border-bottom: rgba(0,0,0,.1);
     flex-direction: row;
     display: flex;
+    margin: 1rem;
 }
 
 div.message a:hover {
@@ -50,7 +58,7 @@ div.message-righthand {
 }
 
 .rightHandIcons {
-    color: rgb(95 99 103);
+    color: rgba(95 99 103);
 }
 
 .loader {
@@ -72,3 +80,7 @@ div.message-righthand {
     100% { transform: rotate(360deg); }
 }
 
+#system_icon{
+    width: 1.5em;
+    height: 1.5em;
+}

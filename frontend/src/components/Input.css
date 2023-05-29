@@ -10,6 +10,7 @@ textarea {
     line-height: 1.5rem;
     resize: none;
     max-height: 300px;
+    font-family: 'Inter';
 }
 
 textarea:focus {
@@ -87,6 +88,10 @@ svg {
     box-shadow: 0 0 10px rgba(0,0,0,.1);
     border: rgba(0,0,0,.1) 1px solid;
     border-radius: .375rem;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(0.06rem);
+    -webkit-backdrop-filter: blur(0.06rem);
+    padding: 0.5rem;
 }
 
 .input-holder.focused {

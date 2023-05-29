@@ -23,6 +23,9 @@ if (ORIGIN_URL.port === "3000") {
 }
 export const API_ADDRESS = `${ORIGIN_URL.toString()}api`;
 
+// eslint-disable-next-line no-restricted-globals
+export const PUBLIC_URL = location.origin;
+
 const SupportedLanguages = [
   { language: "Afrikaans", locale: "af" },
   { language: "Albanian", locale: "sq" },
