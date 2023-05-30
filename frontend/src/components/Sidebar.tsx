@@ -1,7 +1,6 @@
-import AssistantIcon from "@mui/icons-material/Assistant";
-
 import "./Sidebar.css";
-import {PUBLIC_URL} from '../App'
+import { PUBLIC_URL } from "../App";
+import Button from "@mui/material/Button";
 
 export default function Sidebar(props: {
   models: Array<{ name: string; displayName: string }>;
@@ -11,16 +10,9 @@ export default function Sidebar(props: {
   languages: Array<{ language: string; locale: string }>;
   selectedLocale: string;
   setSelectedLocale: any;
-  setOpenAIKey: any;
-  openAIKey: string;
+  onShipCalculatorPage: boolean;
+  setOnShipCalculatorPage: (value: boolean) => void;
 }) {
-  const handleOpenAIButtonClick = () => {
-    const key = prompt("Please enter your OpenAI key", props.openAIKey);
-    if (key != null) {
-      props.setOpenAIKey(key);
-    }
-  };
-
   return (
     <>
       <div className="sidebar">
@@ -32,7 +24,25 @@ export default function Sidebar(props: {
           </div>
         </div>
         <div className="settings">
-          <label className="header">Settings</label>
+          <label className="header"></label>
+          {!props.onShipCalculatorPage && (
+            <Button
+              variant="contained"
+              onClick={() => props.setOnShipCalculatorPage(true)}
+              style={{ width: 300 }}
+            >
+              Shipping Rate Calculator
+            </Button>
+          )}
+          {props.onShipCalculatorPage && (
+            <Button
+              variant="contained"
+              onClick={() => props.setOnShipCalculatorPage(false)}
+              style={{ width: 300 }}
+            >
+              Chat AI
+            </Button>
+          )}
           <label>Languages</label>
           <select
             value={props.selectedLocale}
@@ -46,21 +56,6 @@ export default function Sidebar(props: {
               );
             })}
           </select>
-          <label>Model</label>
-          <select
-            value={props.selectedModel}
-            onChange={(event) => props.onSelectModel(event.target.value)}
-          >
-            {props.models.map((model, index) => {
-              return (
-                <option key={index} value={model.name}>
-                  {model.displayName}
-                </option>
-              );
-            })}
-          </select>
-          <label>Credentials</label>
-          <button onClick={handleOpenAIButtonClick}>Set OpenAI key</button>
         </div>
       </div>
     </>

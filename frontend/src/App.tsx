@@ -4,6 +4,7 @@ import Sidebar from "./components/Sidebar";
 import Chat, { WaitingStates } from "./components/Chat";
 import React, { useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
+import ShipRateCalculator from "./components/ShipRateCalculator";
 
 export type MessageDict = {
   text: string;
@@ -188,8 +189,6 @@ function App() {
       : navigator.language.split("-")[0]
   );
 
-  let [openAIKey, setOpenAIKey] = useLocalStorage<string>("OpenAIKey", "");
-
   let [messages, setMessages] = useState<Array<MessageDict>>(
     Array.from([
       {
@@ -208,6 +207,8 @@ function App() {
     WaitingStates.Idle
   );
   const chatScrollRef = React.useRef<HTMLDivElement>(null);
+
+  const [onShipCalculatorPage, setOnShipCalculatorPage] = useState(false);
 
   const addMessage = (message: MessageDict) => {
     setMessages((state: any) => {
@@ -256,8 +257,6 @@ function App() {
         },
         body: JSON.stringify({
           prompt: userInput,
-          model: selectedModel,
-          openAIKey: openAIKey,
           locale: selectedLocale,
         }),
       });
@@ -333,6 +332,10 @@ function App() {
   // }, [getApiData]);
 
   React.useEffect(() => {
+    if (chatScrollRef.current == null) {
+      return;
+    }
+
     // Scroll down container by setting scrollTop to the height of the container
     chatScrollRef.current!.scrollTop = chatScrollRef.current!.scrollHeight;
   }, [chatScrollRef, messages]);
@@ -377,24 +380,29 @@ function App() {
           onSelectModel={(val: string) => {
             setSelectedModel(val);
           }}
-          openAIKey={openAIKey}
-          setOpenAIKey={(val: string) => {
-            setOpenAIKey(val);
-          }}
+          onShipCalculatorPage={onShipCalculatorPage}
+          setOnShipCalculatorPage={setOnShipCalculatorPage}
         />
         <div className="main">
-          <Chat
-            chatScrollRef={chatScrollRef}
-            waitingForSystem={waitingForSystem}
-            messages={messages}
-            selectedLocale={selectedLocale}
-          />
-          <Input
-            onSendMessage={sendMessage}
-            onCompletedUpload={completeUpload}
-            onStartUpload={startUpload}
-            selectedLocale={selectedLocale}
-          />
+          {onShipCalculatorPage && (
+            <ShipRateCalculator selectedLocale={selectedLocale} />
+          )}
+          {!onShipCalculatorPage && (
+            <Chat
+              chatScrollRef={chatScrollRef}
+              waitingForSystem={waitingForSystem}
+              messages={messages}
+              selectedLocale={selectedLocale}
+            />
+          )}
+          {!onShipCalculatorPage && (
+            <Input
+              onSendMessage={sendMessage}
+              onCompletedUpload={completeUpload}
+              onStartUpload={startUpload}
+              selectedLocale={selectedLocale}
+            />
+          )}
         </div>
       </div>
     </>
