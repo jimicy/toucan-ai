@@ -14,8 +14,7 @@ EMBEDDING_MODEL = "text-embedding-ada-002"
 GPT_MODEL = "gpt-3.5-turbo"
 
 # download pre-chunked text and pre-computed embeddings
-# this file is ~200 MB, so may take a minute depending on your connection speed
-embeddings_path = "http://localhost:3000/wikipedia_export_vector_embeddings.csv"
+embeddings_path = os.environ.get("EMBEDDINGS_CSV_URL")
 df = pd.read_csv(embeddings_path)
 
 # convert embeddings from CSV str type back to list type
@@ -56,7 +55,7 @@ def query_message(
 ) -> str:
     """Return a message for GPT, with relevant source texts pulled from a dataframe."""
     strings, relatednesses = strings_ranked_by_relatedness(query, df)
-    introduction = 'Use the below articles on Exporting Goods to answer the subsequent question. Please provide sources. If the answer cannot be found, use your own knowledge instead'
+    introduction = 'The articles below have context you can use about Exporting Goods to answer the subsequent question. Please provide sources. If the answer cannot be found, just use your own knowledge instead.'
     question = f"\n\nQuestion: {query}"
     message = introduction
     for string in strings:

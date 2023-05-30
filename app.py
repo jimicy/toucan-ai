@@ -19,7 +19,7 @@ SHIPENGINE_API_KEY = os.getenv("SHIPENGINE_API_KEY")
 
 def translate_text(text, target="en"):
   service = build("translate", "v2", developerKey=GOOGLE_CLOUD_API_KEY)
-  response = service.translations().list(source="en", target=target, q=[text]).execute()
+  response = service.translations().list(target=target, q=[text]).execute()
   # Extract the translated text from the response
   translated_text = response['translations'][0]['translatedText']
   return translated_text
@@ -61,7 +61,7 @@ def generate_response():
   else:
     english_user_prompt = translate_text(request.json["prompt"])
     ai_english_response = ai.ask(english_user_prompt)
-    ai_translated_response = translate_text(ai_response, request.json["locale"])
+    ai_translated_response = translate_text(ai_english_response, request.json["locale"])
     response = jsonify({"text": ai_translated_response, "locale": request.json["locale"]})
   return response
 
