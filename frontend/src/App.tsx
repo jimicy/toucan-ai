@@ -192,12 +192,10 @@ function App() {
   let [messages, setMessages] = useState<Array<MessageDict>>(
     Array.from([
       {
-        text: "Hello! I'm a GPT Code assistant. Ask me to do something for you! Pro tip: you can upload a file and I'll be able to use it.",
-        role: "system",
-        type: "message",
-      },
-      {
-        text: "If I get stuck just type 'reset' and I'll restart the kernel.",
+        text: `Hello! I'm Toucan, an AI powered consultant fined tuned for the international trade, shipping, logistics industry. I can help you with your international trade needs!
+You can ask me questions like:
+  • How do I ship from Malaysia to United States? Explain step by step.
+  • What the tax rate for sales of goods, provisions of services and import for Thailand?`,
         role: "system",
         type: "message",
       },
