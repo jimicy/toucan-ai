@@ -4,6 +4,7 @@ from flask import Flask, current_app, request, jsonify, make_response
 from flask_cors import CORS
 from googleapiclient.discovery import build
 import requests
+import ai
 
 app = Flask(__name__, static_url_path='', static_folder='frontend/build')
 if os.environ.get("ENV") == "development":
@@ -55,11 +56,13 @@ def index():
 @app.route('/api/generate', methods=['POST'])
 def generate_response():
   if (request.json["locale"].startswith("en")):
-    response = jsonify({"text": "Server Toucan AI says hello!", "locale": request.json["locale"]})
+    ai_english_response = ai.ask(request.json["prompt"])
+    response = jsonify({"text": ai_english_response, "locale": request.json["locale"]})
   else:
-    text = translate_text("Server Toucan AI says hello!", request.json["locale"])
-    response = jsonify({"text": text, "locale": request.json["locale"]})
-
+    english_user_prompt = translate_text(request.json["prompt"])
+    ai_english_response = ai.ask(english_user_prompt)
+    ai_translated_response = translate_text(ai_response, request.json["locale"])
+    response = jsonify({"text": ai_translated_response, "locale": request.json["locale"]})
   return response
 
 @app.route('/api/synthesize-speech', methods=['POST'])
