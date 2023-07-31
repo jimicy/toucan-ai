@@ -11,7 +11,7 @@ openai.api_key = OPEN_API_KEY
 
 # models
 EMBEDDING_MODEL = "text-embedding-ada-002"
-GPT_MODEL = "gpt-3.5-turbo"
+GPT_MODEL = "gpt-3.5-turbo-0613"
 
 # download pre-chunked text and pre-computed embeddings
 embeddings_path = os.environ.get("EMBEDDINGS_CSV_URL")
@@ -55,7 +55,7 @@ def query_message(
 ) -> str:
     """Return a message for GPT, with relevant source texts pulled from a dataframe."""
     strings, relatednesses = strings_ranked_by_relatedness(query, df)
-    introduction = 'The articles below have context you can use about Exporting Goods to answer the subsequent question. Please provide sources. If the answer cannot be found, just use your own knowledge instead.'
+    introduction = 'The articles below have context you can use about Exporting Goods to answer the subsequent question. Please provide sources. Write wikipedia sources format with url https://en.wikipedia.org/wiki/. If the answer cannot be found, just use your own knowledge instead.'
     question = f"\n\nQuestion: {query}"
     message = introduction
     for string in strings:
@@ -72,9 +72,10 @@ def query_message(
 
 def ask(
     query: str,
+    locale: str = None,
     df: pd.DataFrame = df,
     model: str = GPT_MODEL,
-    token_budget: int = 4096 - 500,
+    token_budget: int = 4096,
     print_message: bool = False,
 ) -> str:
     """Answers a query using GPT and a dataframe of relevant texts and embeddings."""
@@ -83,14 +84,29 @@ def ask(
     if print_message:
         print(message)
 
-    messages = [
-        {"role": "system", "content": "You answer questions about the 2022 Winter Olympics."},
-        {"role": "user", "content": message},
-    ]
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0
-    )
-    response_message = response["choices"][0]["message"]["content"]
-    return response_message
+    if (locale != None):
+        messages = [
+            # {"role": "system", "content": "Reply in this language locale: " + locale},
+            {"role": "user", "content": message},
+            {"role": "user", "content": "Make sure all of the reply is in this language locale: " + locale},
+        ]
+    else:
+        messages = [
+            {"role": "user", "content": message},
+        ]
+
+    try:
+        resp = ''
+        for chunk in openai.ChatCompletion.create(
+            model=model,
+            messages=messages,
+            temperature=0,
+            stream=True
+        ):
+            content = chunk["choices"][0].get("delta", {}).get("content")
+            if content is not None:
+                    yield content
+
+    except Exception as e:
+        print(e)
+        return str(e)

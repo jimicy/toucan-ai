@@ -201,6 +201,7 @@ You can ask me questions like:
       },
     ])
   );
+
   let [waitingForSystem, setWaitingForSystem] = useState<WaitingStates>(
     WaitingStates.Idle
   );
@@ -246,7 +247,9 @@ You can ask me questions like:
       }
 
       addMessage({ text: userInput, type: "message", role: "user" });
-      setWaitingForSystem(WaitingStates.GeneratingCode);
+      // setWaitingForSystem(WaitingStates.GeneratingCode);
+
+      console.log("prev original", messages);
 
       const response = await fetch(`${API_ADDRESS}/generate`, {
         method: "POST",
@@ -258,17 +261,36 @@ You can ask me questions like:
           locale: selectedLocale,
         }),
       });
-      const data = await response.json();
-      const text = data.text;
+
+      if (response.status === 200 && response.body) {
+        const message = { text: "", type: "message", role: "system" };
+        setMessages((state: any) => {
+          return [...state, message];
+        });
+
+        const reader = response.body
+          .pipeThrough(new TextDecoderStream())
+          .getReader();
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) {
+            console.log(`stream done ${done}`);
+            break;
+          }
+          message.text += value;
+          setMessages((state: any) => {
+            return [...state.slice(0, -1), message];
+          });
+        }
+      }
+
+      // const data = await response.json();
+      // const text = data.text;
 
       // const text = "Toucan AI says hello!";
       // addMessage({ text: text, type: "message", role: "system" });
 
-      setWaitingForSystem(WaitingStates.Idle);
-
-      if (response.status === 200) {
-        addMessage({ text: text, type: "message", role: "system" });
-      }
+      // setWaitingForSystem(WaitingStates.Idle);
 
       // submitCode(code);
       // setWaitingForSystem(WaitingStates.RunningCode);

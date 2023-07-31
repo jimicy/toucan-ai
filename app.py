@@ -1,6 +1,6 @@
 import io
 import os
-from flask import Flask, current_app, request, jsonify, make_response
+from flask import Flask, current_app, request, jsonify, make_response, Response, stream_with_context
 from flask_cors import CORS
 from googleapiclient.discovery import build
 import requests
@@ -56,14 +56,10 @@ def index():
 @app.route('/api/generate', methods=['POST'])
 def generate_response():
   if (request.json["locale"].startswith("en")):
-    ai_english_response = ai.ask(request.json["prompt"])
-    response = jsonify({"text": ai_english_response, "locale": request.json["locale"]})
+    stream_response = ai.ask(request.json["prompt"])
   else:
-    english_user_prompt = translate_text(request.json["prompt"])
-    ai_english_response = ai.ask(english_user_prompt)
-    ai_translated_response = translate_text(ai_english_response, request.json["locale"])
-    response = jsonify({"text": ai_translated_response, "locale": request.json["locale"]})
-  return response
+    stream_response = ai.ask(request.json["prompt"], request.json["locale"])
+  return Response(stream_with_context(stream_response), mimetype='text/event-stream')
 
 @app.route('/api/synthesize-speech', methods=['POST'])
 def synthesize_speech():
