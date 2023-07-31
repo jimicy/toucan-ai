@@ -356,7 +356,8 @@ function ShipRateEstimateForm(props: {
         address_residential_indicator: "unknown",
       }),
     });
-    const data = await response.json();
+    let data = (await response.json()) as Array<Estimate>;
+    data = data.filter((estimate) => estimate.error_messages.length === 0);
     props.setEstimates(data);
   };
 
