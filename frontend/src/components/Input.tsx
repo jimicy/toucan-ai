@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import SendIcon from "@mui/icons-material/Send";
@@ -6,13 +6,15 @@ import KeyboardVoiceIcon from "@mui/icons-material/KeyboardVoice";
 import TextareaAutosize from "react-textarea-autosize";
 import "./Input.css";
 import { API_ADDRESS } from "../App";
+import { LocaleContext } from "./context";
 
 export default function Input(props: {
   onSendMessage: any;
   onStartUpload: any;
   onCompletedUpload: any;
-  selectedLocale: string;
 }) {
+  const selectedLocale = useContext(LocaleContext);
+
   let fileInputRef = useRef<HTMLInputElement>(null);
   let [inputIsFocused, setInputIsFocused] = useState<boolean>(false);
   let [userInput, setUserInput] = useState<string>("");
@@ -81,7 +83,7 @@ export default function Input(props: {
 
     recognition.continous = true;
     recognition.interimResults = true;
-    recognition.lang = props.selectedLocale;
+    recognition.lang = selectedLocale;
     recognition.start();
     setListeningToVoice(true);
 

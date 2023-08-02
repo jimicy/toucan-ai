@@ -1,10 +1,8 @@
 import "./App.css";
 import Input from "./components/Input";
-import Sidebar from "./components/Sidebar";
 import Chat, { WaitingStates } from "./components/Chat";
-import React, { useState } from "react";
-import { useLocalStorage } from "usehooks-ts";
-import ShipRateCalculator from "./components/ShipRateCalculator";
+import React, { useContext, useState } from "react";
+import { LocaleContext } from "./components/context";
 
 export type MessageDict = {
   text: string;
@@ -28,167 +26,10 @@ export const API_ADDRESS = `${ORIGIN_URL.toString()}api`;
 // eslint-disable-next-line no-restricted-globals
 export const PUBLIC_URL = location.origin;
 
-const SupportedLanguages = [
-  { language: "Afrikaans", locale: "af" },
-  { language: "Albanian", locale: "sq" },
-  { language: "Amharic", locale: "am" },
-  { language: "Arabic", locale: "ar" },
-  { language: "Armenian", locale: "hy" },
-  { language: "Assamese", locale: "as" },
-  { language: "Aymara", locale: "ay" },
-  { language: "Azerbaijani", locale: "az" },
-  { language: "Bambara", locale: "bm" },
-  { language: "Basque", locale: "eu" },
-  { language: "Belarusian", locale: "be" },
-  { language: "Bengali", locale: "bn" },
-  { language: "Bhojpuri", locale: "bho" },
-  { language: "Bosnian", locale: "bs" },
-  { language: "Bulgarian", locale: "bg" },
-  { language: "Catalan", locale: "ca" },
-  { language: "Cebuano", locale: "ceb" },
-  { language: "Chinese (Simplified)", locale: "zh-CN" },
-  { language: "Chinese (Traditional)", locale: "zh-TW" },
-  { language: "Corsican", locale: "co" },
-  { language: "Croatian", locale: "hr" },
-  { language: "Czech", locale: "cs" },
-  { language: "Danish", locale: "da" },
-  { language: "Dhivehi", locale: "dv" },
-  { language: "Dogri", locale: "doi" },
-  { language: "Dutch", locale: "nl" },
-  { language: "English", locale: "en" },
-  { language: "Esperanto", locale: "eo" },
-  { language: "Estonian", locale: "et" },
-  { language: "Ewe", locale: "ee" },
-  { language: "Filipino (Tagalog)", locale: "fil" },
-  { language: "Finnish", locale: "fi" },
-  { language: "French", locale: "fr" },
-  { language: "Frisian", locale: "fy" },
-  { language: "Galician", locale: "gl" },
-  { language: "Georgian", locale: "ka" },
-  { language: "German", locale: "de" },
-  { language: "Greek", locale: "el" },
-  { language: "Guarani", locale: "gn" },
-  { language: "Gujarati", locale: "gu" },
-  { language: "Haitian Creole", locale: "ht" },
-  { language: "Hausa", locale: "ha" },
-  { language: "Hawaiian", locale: "haw" },
-  { language: "Hebrew", locale: "he or iw" },
-  { language: "Hindi", locale: "hi" },
-  { language: "Hmong", locale: "hmn" },
-  { language: "Hungarian", locale: "hu" },
-  { language: "Icelandic", locale: "is" },
-  { language: "Igbo", locale: "ig" },
-  { language: "Ilocano", locale: "ilo" },
-  { language: "Indonesian", locale: "id" },
-  { language: "Irish", locale: "ga" },
-  { language: "Italian", locale: "it" },
-  { language: "Japanese", locale: "ja" },
-  { language: "Javanese", locale: "jv or jw" },
-  { language: "Kannada", locale: "kn" },
-  { language: "Kazakh", locale: "kk" },
-  { language: "Khmer", locale: "km" },
-  { language: "Kinyarwanda", locale: "rw" },
-  { language: "Konkani", locale: "gom" },
-  { language: "Korean", locale: "ko" },
-  { language: "Krio", locale: "kri" },
-  { language: "Kurdish", locale: "ku" },
-  { language: "Kurdish (Sorani)", locale: "ckb" },
-  { language: "Kyrgyz", locale: "ky" },
-  { language: "Lao", locale: "lo" },
-  { language: "Latin", locale: "la" },
-  { language: "Latvian", locale: "lv" },
-  { language: "Lingala", locale: "ln" },
-  { language: "Lithuanian", locale: "lt" },
-  { language: "Luganda", locale: "lg" },
-  { language: "Luxembourgish", locale: "lb" },
-  { language: "Macedonian", locale: "mk" },
-  { language: "Maithili", locale: "mai" },
-  { language: "Malagasy", locale: "mg" },
-  { language: "Malay", locale: "ms" },
-  { language: "Malayalam", locale: "ml" },
-  { language: "Maltese", locale: "mt" },
-  { language: "Maori", locale: "mi" },
-  { language: "Marathi", locale: "mr" },
-  { language: "Meiteilon (Manipuri)", locale: "mni-Mtei" },
-  { language: "Mizo", locale: "lus" },
-  { language: "Mongolian", locale: "mn" },
-  { language: "Myanmar (Burmese)", locale: "my" },
-  { language: "Nepali", locale: "ne" },
-  { language: "Norwegian", locale: "no" },
-  { language: "Nyanja (Chichewa)", locale: "ny" },
-  { language: "Odia (Oriya)", locale: "or" },
-  { language: "Oromo", locale: "om" },
-  { language: "Pashto", locale: "ps" },
-  { language: "Persian", locale: "fa" },
-  { language: "Polish", locale: "pl" },
-  { language: "Portuguese (Portugal, Brazil)", locale: "pt" },
-  { language: "Punjabi", locale: "pa" },
-  { language: "Quechua", locale: "qu" },
-  { language: "Romanian", locale: "ro" },
-  { language: "Russian", locale: "ru" },
-  { language: "Samoan", locale: "sm" },
-  { language: "Sanskrit", locale: "sa" },
-  { language: "Scots Gaelic", locale: "gd" },
-  { language: "Sepedi", locale: "nso" },
-  { language: "Serbian", locale: "sr" },
-  { language: "Sesotho", locale: "st" },
-  { language: "Shona", locale: "sn" },
-  { language: "Sindhi", locale: "sd" },
-  { language: "Sinhala (Sinhalese)", locale: "si" },
-  { language: "Slovak", locale: "sk" },
-  { language: "Slovenian", locale: "sl" },
-  { language: "Somali", locale: "so" },
-  { language: "Spanish", locale: "es" },
-  { language: "Sundanese", locale: "su" },
-  { language: "Swahili", locale: "sw" },
-  { language: "Swedish", locale: "sv" },
-  { language: "Tagalog (Filipino)", locale: "tl" },
-  { language: "Tajik", locale: "tg" },
-  { language: "Tamil", locale: "ta" },
-  { language: "Tatar", locale: "tt" },
-  { language: "Telugu", locale: "te" },
-  { language: "Thai", locale: "th" },
-  { language: "Tigrinya", locale: "ti" },
-  { language: "Tsonga", locale: "ts" },
-  { language: "Turkish", locale: "tr" },
-  { language: "Turkmen", locale: "tk" },
-  { language: "Twi (Akan)", locale: "ak" },
-  { language: "Ukrainian", locale: "uk" },
-  { language: "Urdu", locale: "ur" },
-  { language: "Uyghur", locale: "ug" },
-  { language: "Uzbek", locale: "uz" },
-  { language: "Vietnamese", locale: "vi" },
-  { language: "Welsh", locale: "cy" },
-  { language: "Xhosa", locale: "xh" },
-  { language: "Yiddish", locale: "yi" },
-  { language: "Yoruba", locale: "yo" },
-  { language: "Zulu", locale: "zu}" },
-];
-
 function App() {
   const COMMANDS = ["reset"];
-  const MODELS = [
-    {
-      displayName: "GPT-3.5",
-      name: "gpt-3.5-turbo",
-    },
-    {
-      displayName: "GPT-4",
-      name: "gpt-4",
-    },
-  ];
 
-  let [selectedModel, setSelectedModel] = useLocalStorage<string>(
-    "model",
-    MODELS[0].name
-  );
-
-  let [selectedLocale, setSelectedLocale] = useLocalStorage<string>(
-    "locale",
-    navigator.language.startsWith("zh")
-      ? navigator.language
-      : navigator.language.split("-")[0]
-  );
+  const selectedLocale = useContext(LocaleContext);
 
   let [messages, setMessages] = useState<Array<MessageDict>>(
     Array.from([
@@ -207,8 +48,6 @@ You can ask me questions like:
     WaitingStates.Idle
   );
   const chatScrollRef = React.useRef<HTMLDivElement>(null);
-
-  const [onShipCalculatorPage, setOnShipCalculatorPage] = useState(false);
 
   const addMessage = (message: MessageDict) => {
     setMessages((state: any) => {
@@ -249,9 +88,6 @@ You can ask me questions like:
       }
 
       addMessage({ text: userInput, type: "message", role: "user" });
-      // setWaitingForSystem(WaitingStates.GeneratingCode);
-
-      console.log("prev original", messages);
 
       const response = await fetch(`${API_ADDRESS}/generate`, {
         method: "POST",
@@ -285,17 +121,6 @@ You can ask me questions like:
           });
         }
       }
-
-      // const data = await response.json();
-      // const text = data.text;
-
-      // const text = "Toucan AI says hello!";
-      // addMessage({ text: text, type: "message", role: "system" });
-
-      // setWaitingForSystem(WaitingStates.Idle);
-
-      // submitCode(code);
-      // setWaitingForSystem(WaitingStates.RunningCode);
     } catch (error) {
       console.error(
         "There has been a problem with your fetch operation:",
@@ -303,23 +128,6 @@ You can ask me questions like:
       );
     }
   };
-
-  // async function getApiData() {
-  //   if(document.hidden){
-  //     return;
-  //   }
-
-  //   let response = await fetch(`${Config.API_ADDRESS}/api`);
-  //   let data = await response.json();
-  //   data.results.forEach(function (result: {value: string, type: string}) {
-  //     if (result.value.trim().length == 0) {
-  //       return;
-  //     }
-
-  //     addMessage({ text: result.value, type: result.type, role: "system" });
-  //     setWaitingForSystem(WaitingStates.Idle);
-  //   });
-  // }
 
   function completeUpload(filename: string) {
     addMessage({
@@ -335,11 +143,6 @@ You can ask me questions like:
   function startUpload(_: string) {
     setWaitingForSystem(WaitingStates.UploadingFile);
   }
-
-  // React.useEffect(() => {
-  //   const interval = setInterval(getApiData, 1000);
-  //   return () => clearInterval(interval);
-  // }, [getApiData]);
 
   React.useEffect(() => {
     if (chatScrollRef.current == null) {
@@ -380,40 +183,17 @@ You can ask me questions like:
 
   return (
     <>
-      <div className="app">
-        <Sidebar
-          models={MODELS}
-          selectedModel={selectedModel}
-          languages={SupportedLanguages}
-          selectedLocale={selectedLocale}
-          setSelectedLocale={setSelectedLocale}
-          onSelectModel={(val: string) => {
-            setSelectedModel(val);
-          }}
-          onShipCalculatorPage={onShipCalculatorPage}
-          setOnShipCalculatorPage={setOnShipCalculatorPage}
+      <div className="main">
+        <Chat
+          chatScrollRef={chatScrollRef}
+          waitingForSystem={waitingForSystem}
+          messages={messages}
         />
-        <div className="main">
-          {onShipCalculatorPage && (
-            <ShipRateCalculator selectedLocale={selectedLocale} />
-          )}
-          {!onShipCalculatorPage && (
-            <Chat
-              chatScrollRef={chatScrollRef}
-              waitingForSystem={waitingForSystem}
-              messages={messages}
-              selectedLocale={selectedLocale}
-            />
-          )}
-          {!onShipCalculatorPage && (
-            <Input
-              onSendMessage={sendMessage}
-              onCompletedUpload={completeUpload}
-              onStartUpload={startUpload}
-              selectedLocale={selectedLocale}
-            />
-          )}
-        </div>
+        <Input
+          onSendMessage={sendMessage}
+          onCompletedUpload={completeUpload}
+          onStartUpload={startUpload}
+        />
       </div>
     </>
   );

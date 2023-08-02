@@ -6,9 +6,10 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { API_ADDRESS, MessageDict, PUBLIC_URL } from "../App";
 
-import { RefObject, useState } from "react";
+import { RefObject, useContext, useState } from "react";
 import IconButton from "@mui/material/IconButton";
 import { useCopyToClipboard } from "usehooks-ts";
+import { LocaleContext } from "./context";
 
 function Message(props: {
   text: string;
@@ -16,8 +17,9 @@ function Message(props: {
   type: string;
   data?: any;
   showLoader?: boolean;
-  selectedLocale: string;
 }) {
+  const selectedLocale = useContext(LocaleContext);
+
   let { text, role } = props;
   const [_, setCopyToClipboard] = useCopyToClipboard();
 
@@ -37,7 +39,7 @@ function Message(props: {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text: text, locale: props.selectedLocale }),
+        body: JSON.stringify({ text: text, locale: selectedLocale }),
       })
         .then((response) => response.json())
         .then((json) => {
@@ -183,7 +185,6 @@ export default function Chat(props: {
   waitingForSystem: WaitingStates;
   chatScrollRef: RefObject<HTMLDivElement>;
   messages: Array<MessageDict>;
-  selectedLocale: string;
 }) {
   return (
     <>
@@ -196,7 +197,6 @@ export default function Chat(props: {
               role={message.role}
               type={message.type}
               data={message.data}
-              selectedLocale={props.selectedLocale}
             />
           );
         })}
@@ -206,7 +206,6 @@ export default function Chat(props: {
             role="system"
             type="message"
             showLoader={true}
-            selectedLocale={props.selectedLocale}
           />
         ) : null}
       </div>

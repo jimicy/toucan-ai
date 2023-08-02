@@ -1,4 +1,3 @@
-import React, { ChangeEvent, useState } from "react";
 import "./Chat.css";
 import "./ShipRateCalculator.css";
 import {
@@ -22,6 +21,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import { API_ADDRESS } from "../App";
+import { useState } from "react";
 
 const COUNTRY_CODES = [
   { name: "Afghanistan", code: "AF" },
@@ -289,7 +289,6 @@ const weightUnits: Array<WeightUnit> = ["pound", "ounce", "gram", "kilogram"];
 const dimensionsUnits: Array<DimensionsUnit["unit"]> = ["inch", "centimeter"];
 
 function ShipRateEstimateForm(props: {
-  selectedLocale: string;
   setEstimates: (estimates: Array<Estimate>) => void;
 }) {
   const [toCountryCode, setToCountryCode] = useState("");
@@ -668,7 +667,7 @@ type Estimate = {
   error_messages: [];
 };
 
-export default function ShipRateCalculator(props: { selectedLocale: string }) {
+export default function ShipRateCalculator() {
   const [estimates, setEstimates] = useState<Array<Estimate>>([]);
 
   return (
@@ -681,10 +680,7 @@ export default function ShipRateCalculator(props: { selectedLocale: string }) {
               We provide a Rate Estimate comparison between USPS, UPS, Fedex.
             </p>
           </div>
-          <ShipRateEstimateForm
-            selectedLocale={props.selectedLocale}
-            setEstimates={setEstimates}
-          />
+          <ShipRateEstimateForm setEstimates={setEstimates} />
         </div>
         <div className="message system calculator">
           <div>
