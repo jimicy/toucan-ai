@@ -10,6 +10,7 @@ export type MessageDict = {
   text: string;
   role: string;
   type: string;
+  data?: any;
 };
 
 const Config = {
@@ -225,6 +226,7 @@ You can ask me questions like:
 
       fetch(`${Config.API_ADDRESS}/restart`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -321,25 +323,13 @@ You can ask me questions like:
 
   function completeUpload(filename: string) {
     addMessage({
-      text: `File ${filename} was uploaded successfully.`,
-      type: "message",
+      text: `Added ${filename} to context.`,
+      type: "message_file",
       role: "system",
+      data: { filename: filename },
     });
 
     setWaitingForSystem(WaitingStates.Idle);
-
-    // Inform prompt server
-    fetch(`${Config.WEB_ADDRESS}/inject-context`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        prompt: `File ${filename} was uploaded successfully.`,
-      }),
-    })
-      .then(() => {})
-      .catch((error) => console.error("Error:", error));
   }
 
   function startUpload(_: string) {

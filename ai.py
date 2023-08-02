@@ -4,14 +4,16 @@ import openai  # for calling the OpenAI API
 import pandas as pd  # for storing text and embeddings data
 import tiktoken  # for counting tokens
 from scipy import spatial  # for calculating vector similarities for search
-from flask import request
+from flask import session
+from pdfminer.high_level import extract_text
 
 OPEN_API_KEY = os.environ.get("OPEN_API_KEY")
 openai.api_key = OPEN_API_KEY
 
 # models
 EMBEDDING_MODEL = "text-embedding-ada-002"
-GPT_MODEL = "gpt-3.5-turbo-0613"
+GPT_MODEL = "gpt-3.5-turbo-16k-0613"
+MAX_TOKENS_CONTEXT = 16385
 
 # download pre-chunked text and pre-computed embeddings
 embeddings_path = os.environ.get("EMBEDDINGS_CSV_URL")
@@ -69,6 +71,21 @@ def query_message(
             message += next_article
     return message + question
 
+def query_context(query: str, filepath: str) -> str:
+    introduction = 'The following pdf file below contains context you can use about Exporting Goods to answer the subsequent question. If answering using the PDF file end the reply with source: <file name.pdf>. If the answer cannot be found, just use your own knowledge instead.'
+
+    message = introduction
+
+    pdf_file_content = extract_text(session.get('injected_context_filename'))
+    
+    print("filepath", filepath)
+    # print("pdf_file_content", pdf_file_content)
+
+    next_article = f'\n\PDF file name: {filepath}\n"""\n{pdf_file_content}\n"""'
+    message += next_article
+
+    question = f"\n\nQuestion: {query}"
+    return message + question
 
 def ask(
     query: str,
@@ -78,8 +95,13 @@ def ask(
     token_budget: int = 4096,
     print_message: bool = False,
 ) -> str:
-    """Answers a query using GPT and a dataframe of relevant texts and embeddings."""
-    message = query_message(query, df, model=model, token_budget=token_budget)
+    if (session.get('injected_context_filename')):
+        print("Using injected context and model gpt-3.5-turbo-16k-0613", session.get('injected_context_filename'))
+        message = query_context(query, session.get('injected_context_filename'))
+        print("num_tokens(message)", num_tokens(message))
+    else:
+        """Answers a query using GPT and a dataframe of relevant texts and embeddings."""
+        message = query_message(query, df, model=model, token_budget=token_budget)
     
     if print_message:
         print(message)

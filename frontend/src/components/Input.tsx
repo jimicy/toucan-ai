@@ -5,6 +5,7 @@ import SendIcon from "@mui/icons-material/Send";
 import KeyboardVoiceIcon from "@mui/icons-material/KeyboardVoice";
 import TextareaAutosize from "react-textarea-autosize";
 import "./Input.css";
+import { API_ADDRESS } from "../App";
 
 export default function Input(props: {
   onSendMessage: any;
@@ -43,7 +44,7 @@ export default function Input(props: {
       props.onStartUpload(file.name);
 
       try {
-        const response = await fetch("/upload", {
+        const response = await fetch(`${API_ADDRESS}/upload`, {
           method: "POST",
           body: formData,
         });
@@ -106,6 +107,9 @@ export default function Input(props: {
         <form className="file-upload">
           <input
             onChange={handleFileChange}
+            onClick={(event: React.MouseEvent<HTMLInputElement>) =>
+              ((event.target as HTMLInputElement).value = "")
+            }
             ref={fileInputRef}
             style={{ display: "none" }}
             type="file"

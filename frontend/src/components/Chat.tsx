@@ -3,9 +3,10 @@ import "./Chat.css";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import PersonIcon from "@mui/icons-material/Person";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { API_ADDRESS, MessageDict, PUBLIC_URL } from "../App";
 
-import { RefObject } from "react";
+import { RefObject, useState } from "react";
 import IconButton from "@mui/material/IconButton";
 import { useCopyToClipboard } from "usehooks-ts";
 
@@ -13,11 +14,14 @@ function Message(props: {
   text: string;
   role: string;
   type: string;
+  data?: any;
   showLoader?: boolean;
   selectedLocale: string;
 }) {
   let { text, role } = props;
   const [_, setCopyToClipboard] = useCopyToClipboard();
+
+  const [removedFileContext, setRemovedFileContext] = useState<string>("");
 
   const handleTextToSpeech = (event: React.MouseEvent<Element>) => {
     const foundAudioElement = event.currentTarget?.querySelector("audio");
@@ -29,6 +33,7 @@ function Message(props: {
 
       fetch(`${API_ADDRESS}/synthesize-speech`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -61,6 +66,20 @@ function Message(props: {
     }
   };
 
+  const clearContextFile = (filename: string) => {
+    fetch(`${API_ADDRESS}/injected_context_filename`, {
+      method: "DELETE",
+      credentials: "include",
+    })
+      .then((response) => response.json())
+      .then((json) => {
+        setRemovedFileContext(`Cleared ${filename} from context`);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
+
   const copyToClipboard = () => {
     setCopyToClipboard(text);
   };
@@ -69,10 +88,30 @@ function Message(props: {
     <div className={"message " + (role == "system" ? "system" : "user")}>
       <div className="avatar-holder">
         <div className="avatar">
-          {role == "system" ? <img id="system_icon" src={`${PUBLIC_URL}/toucan_logoWhite.svg`} alt="toucan logo" /> : <PersonIcon />}
+          {role == "system" ? (
+            <img
+              id="system_icon"
+              src={`${PUBLIC_URL}/toucan_logoWhite.svg`}
+              alt="toucan logo"
+            />
+          ) : (
+            <PersonIcon />
+          )}
         </div>
       </div>
       <div className="message-body">
+        {props.type == "message_file" &&
+          (props.showLoader ? (
+            <div>
+              {text} {props.showLoader ? <div className="loader"></div> : null}
+            </div>
+          ) : (
+            <div
+              className="cell-output"
+              dangerouslySetInnerHTML={{ __html: removedFileContext || text }}
+            ></div>
+          ))}
+
         {(props.type == "message" || props.type == "message_raw") &&
           (props.showLoader ? (
             <div>
@@ -103,17 +142,31 @@ function Message(props: {
         )}
       </div>
       <div className="message-righthand">
-        {/* {role === "system" && (
-          <IconButton aria-label="text-to-speech" onClick={handleTextToSpeech}>
-            <VolumeUpIcon className="rightHandIcons" />
+        {props.type === "message_file" && removedFileContext === "" && (
+          <IconButton
+            aria-label="clear-context-file"
+            onClick={() => clearContextFile(props.data.filename)}
+          >
+            <DeleteForeverIcon className="rightHandIcons" />
           </IconButton>
-        )} */}
-        <IconButton aria-label="text-to-speech" onClick={handleTextToSpeech}>
-          <VolumeUpIcon className="rightHandIcons" />
-        </IconButton>
-        <IconButton aria-label="copy-to-clipboard" onClick={copyToClipboard}>
-          <ContentCopyIcon className="rightHandIcons" />
-        </IconButton>
+        )}
+        {(props.type === "message" || props.type == "message_raw") &&
+          role === "system" && (
+            <>
+              <IconButton
+                aria-label="text-to-speech"
+                onClick={handleTextToSpeech}
+              >
+                <VolumeUpIcon className="rightHandIcons" />
+              </IconButton>
+              <IconButton
+                aria-label="copy-to-clipboard"
+                onClick={copyToClipboard}
+              >
+                <ContentCopyIcon className="rightHandIcons" />
+              </IconButton>
+            </>
+          )}
       </div>
     </div>
   );
@@ -142,6 +195,7 @@ export default function Chat(props: {
               text={message.text}
               role={message.role}
               type={message.type}
+              data={message.data}
               selectedLocale={props.selectedLocale}
             />
           );

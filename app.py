@@ -1,14 +1,21 @@
 import io
 import os
-from flask import Flask, current_app, request, jsonify, make_response, Response, stream_with_context
-from flask_cors import CORS
+from flask import Flask, current_app, request, jsonify, Response, stream_with_context, session
+from werkzeug.utils import secure_filename
+from flask_cors import CORS, cross_origin
 from googleapiclient.discovery import build
 import requests
 import ai
 
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'pdf'}
+
 app = Flask(__name__, static_url_path='', static_folder='frontend/build')
+app.secret_key = os.environ.get("FLASK_SECRET_KEY")
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 if os.environ.get("ENV") == "development":
-  CORS(app)
+  CORS(app, supports_credentials=True)
   print("CORS enabled in development", "ENV", os.environ.get("ENV"))
 else:
   print("CORS disabled in production", "ENV", os.environ.get("ENV"))
@@ -75,3 +82,33 @@ def estimate_ship_rate():
     )
   return response.json()
 
+def allowed_file(filename):
+  return '.' in filename and \
+          filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/api/upload', methods=['GET', 'POST'])
+def upload_file():
+  if request.method == 'POST':
+    # check if the post request has the file part
+    if 'file' not in request.files:
+      return jsonify({'success': False, 'error': 'POST request missing file part'}), 400
+
+    file = request.files['file']
+    # If the user does not select a file, the browser submits an
+    # empty file without a filename.
+    if file.filename == '':
+      return jsonify({'success': False, 'error': 'user does not select a file'}), 400
+
+    if file and allowed_file(file.filename):
+      filename = secure_filename(file.filename)
+      file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+      file.save(file_path)
+
+      session['injected_context_filename'] = file_path
+      print(session)
+      return jsonify({'success': True, 'filename': filename})
+
+@app.route('/api/injected_context_filename', methods=['DELETE'])
+def clear_injected_context_filename():
+  deleted_context_filename = session.pop('injected_context_filename', None)
+  return jsonify({'success': True, 'deletedContextFilename': deleted_context_filename})
