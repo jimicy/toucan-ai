@@ -54,6 +54,7 @@ def fetch_store_catalog():
 
 @ecommerce_api_endpoints.route('/api/generate-product', methods=['POST'])
 def generate_product():
+  print("generate_product called")
   engine_id = "stable-diffusion-xl-beta-v2-2-2"
   api_host = os.getenv('API_HOST', 'https://api.stability.ai')
   api_key = os.getenv("STABILITY_API_KEY")

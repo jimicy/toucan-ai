@@ -1,4 +1,5 @@
 import os
+from typing import Generator
 import ast  # for converting embeddings saved as strings back to arrays
 import openai  # for calling the OpenAI API
 import pandas as pd  # for storing text and embeddings data
@@ -118,7 +119,7 @@ def ask(
     messages: list[object],
     locale: str = None,
     model: str = GPT_MODEL,
-) -> str:
+) -> Generator[str, None, None]:
     try:
         for chunk in openai.ChatCompletion.create(
             model=model,
@@ -133,3 +134,16 @@ def ask(
     except Exception as e:
         print(e)
         return str(e)
+
+def ask_wait(
+    messages: list[object],
+    model: str = GPT_MODEL,
+) -> str:
+    """Answers a query using GPT"""
+    response = openai.ChatCompletion.create(
+        model=model,
+        messages=messages,
+        temperature=0
+    )
+    response_message = response["choices"][0]["message"]["content"]
+    return response_message

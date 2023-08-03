@@ -14,7 +14,7 @@ export function useAppState() {
   let [messages, setMessages] = useState<Array<MessageDict>>(
     Array.from([
       {
-        text: `Hello! I'm Square AI, I can help you analyze your business and generate new products and campaigns.`,
+        text: `Hello! I'm Toucan Ecommerce AI, I can help you analyze your business and generate new products and campaigns.`,
         role: "system",
         type: "message",
       },
@@ -30,63 +30,69 @@ export function useAppState() {
     });
   };
 
-  const sendMessage = async (userInput: string, customUserMessage?: string) => {
-    try {
-      if (userInput.length === 0) {
-        return;
-      }
-
-      if (customUserMessage) {
-        addMessage({
-          text: customUserMessage,
-          type: "message_raw",
-          role: "user",
-        });
-      } else {
-        addMessage({ text: userInput, type: "message", role: "user" });
-      }
-
-      setWaitingForSystem(WaitingStates.GeneratingCode);
-      const response = await fetch(`${API_ADDRESS}/ecommerce-generate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: generateContextQuery(messages, userInput),
-          locale: selectedLocale,
-        }),
-      });
-
-      if (response.status === 200 && response.body) {
-        const message = { text: "", type: "message", role: "system" };
-        setMessages((state: any) => {
-          return [...state, message];
-        });
-
-        const reader = response.body
-          .pipeThrough(new TextDecoderStream())
-          .getReader();
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) {
-            console.log(`stream done ${done}`);
-            break;
-          }
-          message.text += value;
-          setMessages((state: any) => {
-            return [...state.slice(0, -1), message];
-          });
+  const sendMessage = async (
+    userInput: string,
+    customUserMessage?: string
+  ): Promise<string> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        if (userInput.length === 0) {
+          return;
         }
-        return { text: message.text };
+
+        if (customUserMessage) {
+          addMessage({
+            text: customUserMessage,
+            type: "message_raw",
+            role: "user",
+          });
+        } else {
+          addMessage({ text: userInput, type: "message", role: "user" });
+        }
+
+        const response = await fetch(`${API_ADDRESS}/ecommerce-generate`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messages: generateContextQuery(messages, userInput),
+            locale: selectedLocale,
+          }),
+        });
+
+        if (response.status === 200 && response.body) {
+          const message = { text: "", type: "message", role: "system" };
+          setMessages((state: any) => {
+            return [...state, message];
+          });
+
+          const reader = response.body
+            .pipeThrough(new TextDecoderStream())
+            .getReader();
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) {
+              console.log(`stream done ${done}`);
+              break;
+            }
+            message.text += value;
+            setMessages((state: any) => {
+              return [...state.slice(0, -1), message];
+            });
+          }
+          resolve(message.text);
+        }
+
+        reject("Response status is not 200");
+      } catch (error) {
+        console.error(
+          "There has been a problem with your fetch operation",
+          error
+        );
+        reject("There has been a problem with your fetch operation");
       }
-      return { text: "" };
-    } catch (error) {
-      console.error(
-        "There has been a problem with your fetch operation:",
-        error
-      );
-    }
+    });
   };
 
   const generateProduct = async () => {
@@ -96,11 +102,7 @@ export function useAppState() {
       customUserMessage
     );
 
-    if (gptResponse && gptResponse.text) {
-      return;
-    }
-
-    const name = gptResponse!.text.split("\n")[0].replace("Product Name: ", "");
+    const name = gptResponse.split("\n")[0].replace("Product Name: ", "");
 
     setWaitingForSystem(WaitingStates.GeneratingCode);
     let response = await fetch(`${API_ADDRESS}/generate-product`, {

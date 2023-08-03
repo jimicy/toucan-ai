@@ -425,7 +425,7 @@ function Message(props: {
               <img
                 id="system_icon"
                 src={`${PUBLIC_URL}/toucan_logo.svg`}
-                alt="Square AI"
+                alt="Toucan Ecommerce AI"
               />
             ) : (
               <PersonIcon />
@@ -455,7 +455,7 @@ function Message(props: {
               <img
                 id="system_icon"
                 src={`${PUBLIC_URL}/toucan_logo.svg`}
-                alt="Square AI"
+                alt="Toucan Ecommerce AI"
               />
             ) : (
               <PersonIcon />
@@ -480,7 +480,7 @@ function Message(props: {
             <img
               id="system_icon"
               src={`${PUBLIC_URL}/toucan_logo.svg`}
-              alt="Square AI"
+              alt="Toucan Ecommerce AI"
             />
           ) : (
             <PersonIcon />
@@ -563,7 +563,7 @@ function Message(props: {
 }
 
 export enum WaitingStates {
-  GeneratingCode = "Square AI is writing a reply...",
+  GeneratingCode = "Toucan Ecommerce AI is writing a reply...",
   RunningCode = "Running code",
   UploadingFile = "Uploading file",
   Idle = "Idle",

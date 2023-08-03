@@ -165,7 +165,7 @@ def run_report():
     {"role": "user", "content": query1},
     {"role": "user", "content": query2},
   ]
-  ai_response = ai.ask(messages)
+  ai_response = ai.ask_wait(messages)
 
   # Convert most_popular_items to json
   most_popular_items = [p.to_json() for p in most_popular_items]
