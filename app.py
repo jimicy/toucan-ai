@@ -7,12 +7,15 @@ from googleapiclient.discovery import build
 import requests
 import ai
 
+from ecommerce_api import ecommerce_api_endpoints
+
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
 
 app = Flask(__name__, static_url_path='', static_folder='frontend/build')
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.register_blueprint(ecommerce_api_endpoints)
 
 if os.environ.get("ENV") == "development":
   CORS(app, supports_credentials=True)
@@ -63,9 +66,9 @@ def index():
 @app.route('/api/generate', methods=['POST'])
 def generate_response():
   if (request.json["locale"].startswith("en")):
-    stream_response = ai.ask(request.json["prompt"])
+    stream_response = ai.toucan_ask(request.json["prompt"])
   else:
-    stream_response = ai.ask(request.json["prompt"], request.json["locale"])
+    stream_response = ai.toucan_ask(request.json["prompt"], request.json["locale"])
   return Response(stream_with_context(stream_response), mimetype='text/event-stream')
 
 @app.route('/api/synthesize-speech', methods=['POST'])

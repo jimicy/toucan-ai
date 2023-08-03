@@ -25,6 +25,14 @@ export default function Sidebar(props: {
               Chat AI
             </Button>
           </Link>
+          <Link to="/ecommerce-ai">
+            <Button
+              variant="contained"
+              style={{ width: 300, marginBottom: "15px" }}
+            >
+              Ecommerce AI
+            </Button>
+          </Link>
           <Link to="/shipping-rate-calculator">
             <Button
               variant="contained"

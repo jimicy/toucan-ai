@@ -9,6 +9,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { LocaleContext, SupportedLanguages } from "./components/context";
 import Sidebar from "./components/Sidebar";
 import ShipRateCalculator from "./components/ShipRateCalculator";
+import EcommerceApp from "./components/EcommerceApp/EcommerceApp";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -41,6 +42,10 @@ function IndexPage() {
     {
       path: "/shipping-rate-calculator",
       element: sideBarAndPage(<ShipRateCalculator />),
+    },
+    {
+      path: "/ecommerce-ai",
+      element: sideBarAndPage(<EcommerceApp />),
     },
   ]);
 

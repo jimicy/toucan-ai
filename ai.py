@@ -87,14 +87,13 @@ def query_context(query: str, filepath: str) -> str:
     question = f"\n\nQuestion: {query}"
     return message + question
 
-def ask(
+def toucan_ask(
     query: str,
     locale: str = None,
     df: pd.DataFrame = df,
     model: str = GPT_MODEL,
     token_budget: int = 4096,
-    print_message: bool = False,
-) -> str:
+):
     if (session.get('injected_context_filename')):
         print("Using injected context and model gpt-3.5-turbo-16k-0613", session.get('injected_context_filename'))
         message = query_context(query, session.get('injected_context_filename'))
@@ -102,13 +101,9 @@ def ask(
     else:
         """Answers a query using GPT and a dataframe of relevant texts and embeddings."""
         message = query_message(query, df, model=model, token_budget=token_budget)
-    
-    if print_message:
-        print(message)
 
     if (locale != None):
         messages = [
-            # {"role": "system", "content": "Reply in this language locale: " + locale},
             {"role": "user", "content": message},
             {"role": "user", "content": "Make sure all of the reply is in this language locale: " + locale},
         ]
@@ -116,9 +111,15 @@ def ask(
         messages = [
             {"role": "user", "content": message},
         ]
+    return ask(messages)
 
+
+def ask(
+    messages: list[object],
+    locale: str = None,
+    model: str = GPT_MODEL,
+) -> str:
     try:
-        resp = ''
         for chunk in openai.ChatCompletion.create(
             model=model,
             messages=messages,
