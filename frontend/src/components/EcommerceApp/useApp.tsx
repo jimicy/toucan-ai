@@ -103,7 +103,12 @@ export function useAppState() {
       customUserMessage
     );
 
-    const name = gptResponse.split("\n")[0].replace("Product Name: ", "");
+    const description = gptResponse
+      .substring(
+        gptResponse.indexOf("Description:") + "Description:".length,
+        gptResponse.indexOf("Explanation:")
+      )
+      .trim();
 
     setWaitingForSystem(WaitingStates.GeneratingCode);
     let response = await fetch(`${API_ADDRESS}/generate-product`, {
@@ -112,7 +117,7 @@ export function useAppState() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt: name,
+        prompt: description,
       }),
     });
     setWaitingForSystem(WaitingStates.Idle);
@@ -123,7 +128,7 @@ export function useAppState() {
         text: img["base64"],
         type: "image/png",
         role: "system",
-        data: { name: name },
+        data: { name: description },
       });
     }
   };

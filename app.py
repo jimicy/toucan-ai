@@ -114,5 +114,6 @@ def upload_file():
 @app.route('/api/injected_context_filename', methods=['DELETE'])
 def clear_injected_context_filename():
   deleted_context_filename = session.pop('injected_context_filename', None)
-  os.remove(os.path.join(app.config['UPLOAD_FOLDER'], deleted_context_filename))
+  if deleted_context_filename:
+    os.remove(deleted_context_filename)
   return jsonify({'success': True, 'deletedContextFilename': deleted_context_filename})

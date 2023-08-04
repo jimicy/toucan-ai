@@ -73,7 +73,7 @@ def fetch_orders():
                   environment='sandbox')
 
   result = client.orders.search_orders(
-    body={"location_ids": ["LHB101E3AKBTA"]})
+    body={"location_ids": ["LF5V3F161W27R"]})
 
   # Items and how many sold
   catalog_object_id_to_metric = {}

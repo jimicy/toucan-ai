@@ -55,7 +55,7 @@ def fetch_store_catalog():
 @ecommerce_api_endpoints.route('/api/generate-product', methods=['POST'])
 def generate_product():
   print("generate_product called")
-  engine_id = "stable-diffusion-xl-beta-v2-2-2"
+  engine_id = "stable-diffusion-xl-1024-v1-0"
   api_host = os.getenv('API_HOST', 'https://api.stability.ai')
   api_key = os.getenv("STABILITY_API_KEY")
 
@@ -71,15 +71,20 @@ def generate_product():
       json={
           "text_prompts": [
               {
-                  "text": request.json["prompt"]
+                "text": request.json["prompt"],
+                "weight": 1
+              },
+              {
+                "text": "painting, portrait, human, photography, realistic, stylized, oil painting, deformed, asymmetrical, blurred, low quality, neon, drawing",
+                "weight": -1
               }
           ],
           "cfg_scale": 7,
-          "clip_guidance_preset": "FAST_BLUE",
-          "height": 512,
-          "width": 512,
+          "height": 1024,
+          "width": 1024,
+          "style_preset": "enhance",
           "samples": 1,
-          "steps": 30,
+          "steps": 20,
       },
   )
   if response.status_code != 200:

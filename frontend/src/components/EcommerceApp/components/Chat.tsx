@@ -424,7 +424,7 @@ function Message(props: {
             {role === "system" ? (
               <img
                 id="system_icon"
-                src={`${PUBLIC_URL}/toucan_logo.svg`}
+                src={`${PUBLIC_URL}/toucan_logoWhite.svg`}
                 alt="Toucan Ecommerce AI"
               />
             ) : (
@@ -454,7 +454,7 @@ function Message(props: {
             {role === "system" ? (
               <img
                 id="system_icon"
-                src={`${PUBLIC_URL}/toucan_logo.svg`}
+                src={`${PUBLIC_URL}/toucan_logoWhite.svg`}
                 alt="Toucan Ecommerce AI"
               />
             ) : (
@@ -479,7 +479,7 @@ function Message(props: {
           {role == "system" ? (
             <img
               id="system_icon"
-              src={`${PUBLIC_URL}/toucan_logo.svg`}
+              src={`${PUBLIC_URL}/toucan_logoWhite.svg`}
               alt="Toucan Ecommerce AI"
             />
           ) : (
@@ -516,7 +516,7 @@ function Message(props: {
               Generated Image for: {props.data.name}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Generated using Stable Diffusion 2.2 XL
+              Generated using Stable Diffusion XL v1.0
             </Typography>
             <div
               className="cell-output-image generatedImg"

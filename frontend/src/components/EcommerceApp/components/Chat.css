@@ -9,25 +9,10 @@ div.message.system {
     padding: 2rem;
 }
 
-div.avatar {
-    background: rgb(97, 128, 199);
-    padding: 5px;
-    color: #fff;
-    border-radius: 2px;
-}
-
-div.avatar svg {
-    color: #fff;
-}
-
 .chat-messages {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-}
-
-div.message.system div.avatar {
-    background: #f9f9f9;
 }
 
 .cell-output {
