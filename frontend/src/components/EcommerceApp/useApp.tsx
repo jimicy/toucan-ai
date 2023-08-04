@@ -57,7 +57,8 @@ export function useAppState() {
           },
           body: JSON.stringify({
             messages: generateContextQuery(messages, userInput),
-            locale: selectedLocale,
+            locale:
+              userInput.indexOf("translate") !== -1 ? "en" : selectedLocale,
           }),
         });
 
@@ -175,7 +176,15 @@ export function useAppState() {
     }
 
     setWaitingForSystem(WaitingStates.GeneratingCode);
-    let response = await fetch(`${API_ADDRESS}/popular-items-analysis`);
+    let response = await fetch(`${API_ADDRESS}/popular-items-analysis`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        locale: selectedLocale,
+      }),
+    });
     let data = await response.json();
     setWaitingForSystem(WaitingStates.Idle);
 

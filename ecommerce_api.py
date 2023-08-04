@@ -133,9 +133,9 @@ def fetch_customers():
     'customers': response.body["customers"][:20]
   })
 
-@ecommerce_api_endpoints.route('/api/popular-items-analysis', methods=['GET'])
+@ecommerce_api_endpoints.route('/api/popular-items-analysis', methods=['POST'])
 def api_popular_items_analysis():
-  return jsonify(popular_items_analysis.run_report())
+  return jsonify(popular_items_analysis.run_report(request.json["locale"]))
 
 # @ecommerce_api_endpoints.route('/api/store-subscriptions-analysis', methods=['GET'])
 # def square_subscriptions_analysis():

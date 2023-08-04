@@ -137,7 +137,9 @@ def fetch_orders():
     'filtered_orders': filtered_orders
   }
 
-def run_report():
+def run_report(
+    locale: str = None,
+):
   # Fetch all the customers and create a customer_id to customer map
   client = Client(
     access_token=os.environ['SQUARE_ACCESS_TOKEN'],
@@ -165,7 +167,7 @@ def run_report():
     {"role": "user", "content": query1},
     {"role": "user", "content": query2},
   ]
-  ai_response = ai.ask_wait(messages)
+  ai_response = ai.ask_wait(messages, locale)
 
   # Convert most_popular_items to json
   most_popular_items = [p.to_json() for p in most_popular_items]

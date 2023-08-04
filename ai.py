@@ -103,16 +103,11 @@ def toucan_ask(
         """Answers a query using GPT and a dataframe of relevant texts and embeddings."""
         message = query_message(query, df, model=model, token_budget=token_budget)
 
-    if (locale != None):
-        messages = [
-            {"role": "user", "content": message},
-            {"role": "user", "content": "Make sure all of the reply is in this language locale: " + locale},
-        ]
-    else:
-        messages = [
-            {"role": "user", "content": message},
-        ]
-    return ask(messages)
+    messages = [
+        {"role": "user", "content": message},
+    ]
+
+    return ask(messages, locale)
 
 
 def ask(
@@ -120,6 +115,9 @@ def ask(
     locale: str = None,
     model: str = GPT_MODEL,
 ) -> Generator[str, None, None]:
+    if (locale != None and not locale.startswith("en")):
+        messages = messages + [{"role": "user", "content": "Make sure all of the reply is in this language locale: " + locale}]
+
     try:
         for chunk in openai.ChatCompletion.create(
             model=model,
@@ -137,9 +135,13 @@ def ask(
 
 def ask_wait(
     messages: list[object],
+    locale: str = None,
     model: str = GPT_MODEL,
 ) -> str:
     """Answers a query using GPT"""
+    if (locale != None and not locale.startswith("en")):
+        messages = messages + [{"role": "user", "content": "Make sure all of the reply is in this language locale: " + locale}]
+
     response = openai.ChatCompletion.create(
         model=model,
         messages=messages,

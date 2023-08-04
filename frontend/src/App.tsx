@@ -96,7 +96,7 @@ You can ask me questions like:
         },
         body: JSON.stringify({
           prompt: userInput,
-          locale: selectedLocale,
+          locale: userInput.indexOf("translate") !== -1 ? "en" : selectedLocale,
         }),
       });
 
