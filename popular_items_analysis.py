@@ -85,6 +85,12 @@ def fetch_orders():
 
   filtered_orders = []
   for order in result.body["orders"]:
+    if "customer_id" not in order:
+      continue
+
+    if "total_money" not in order:
+      continue
+
     if "line_items" in order and len(order["line_items"]):
       line_item = order["line_items"][0]
 
