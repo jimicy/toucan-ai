@@ -1,6 +1,6 @@
 import io
 import os
-from flask import Flask, current_app, request, jsonify, Response, stream_with_context, session
+from flask import Flask, current_app, request, jsonify, Response, stream_with_context, session, redirect, render_template
 from werkzeug.utils import secure_filename
 from flask_cors import CORS, cross_origin
 from googleapiclient.discovery import build
@@ -9,10 +9,22 @@ import ai
 
 from ecommerce_api import ecommerce_api_endpoints
 
+WEBSITE_PASSWORD = os.environ.get("WEBSITE_PASSWORD")
+
+# Override Flask's send_static_file to require authentication
+# https://stackoverflow.com/questions/19765473/override-send-static-file-in-flask
+class SecuredStaticFlask(Flask):
+    def send_static_file(self, filename):
+        # Get user from session
+        if 'is_logged_in' in session and session['is_logged_in']:
+            return super(SecuredStaticFlask, self).send_static_file(filename)
+        else:
+            return redirect("/login")
+
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
 
-app = Flask(__name__, static_url_path='', static_folder='frontend/build')
+app = SecuredStaticFlask(__name__, static_url_path='', static_folder='frontend/build')
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.register_blueprint(ecommerce_api_endpoints)
@@ -26,13 +38,6 @@ else:
 OPEN_API_KEY = os.environ.get("OPEN_API_KEY")
 GOOGLE_CLOUD_API_KEY = os.environ.get("GOOGLE_CLOUD_API_KEY")
 SHIPENGINE_API_KEY = os.getenv("SHIPENGINE_API_KEY")
-
-def translate_text(text, target="en"):
-  service = build("translate", "v2", developerKey=GOOGLE_CLOUD_API_KEY)
-  response = service.translations().list(target=target, q=[text]).execute()
-  # Extract the translated text from the response
-  translated_text = response['translations'][0]['translatedText']
-  return translated_text
 
 def text_to_speech(text, target="en"):
   # Create a service object for the Text-to-Speech API
@@ -58,6 +63,17 @@ def text_to_speech(text, target="en"):
   ).execute()
 
   return response['audioContent']
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+  error = None
+  if request.method == 'POST':
+    if request.form['password'] != WEBSITE_PASSWORD:
+      error = 'Invalid Credentials. Please try again.'
+    else:
+      session['is_logged_in'] = True
+      return redirect("/")
+  return render_template('login.html', error=error)
 
 @app.route('/')
 def index():
@@ -108,7 +124,6 @@ def upload_file():
       file.save(file_path)
 
       session['injected_context_filename'] = file_path
-      print(session)
       return jsonify({'success': True, 'filename': filename})
 
 @app.route('/api/injected_context_filename', methods=['DELETE'])
