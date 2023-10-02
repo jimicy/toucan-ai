@@ -17,32 +17,32 @@ GPT_MODEL = "gpt-3.5-turbo-16k-0613"
 MAX_TOKENS_CONTEXT = 16385
 
 # download pre-chunked text and pre-computed embeddings
-embeddings_path = os.environ.get("EMBEDDINGS_CSV_URL")
-df = pd.read_csv(embeddings_path)
+# embeddings_path = os.environ.get("EMBEDDINGS_CSV_URL")
+# df = pd.read_csv(embeddings_path)
 
 # convert embeddings from CSV str type back to list type
-df['embedding'] = df['embedding'].apply(ast.literal_eval)
+# df['embedding'] = df['embedding'].apply(ast.literal_eval)
 
 # search function
-def strings_ranked_by_relatedness(
-    query: str,
-    df: pd.DataFrame,
-    relatedness_fn=lambda x, y: 1 - spatial.distance.cosine(x, y),
-    top_n: int = 100
-) -> tuple[list[str], list[float]]:
-    """Returns a list of strings and relatednesses, sorted from most related to least."""
-    query_embedding_response = openai.Embedding.create(
-        model=EMBEDDING_MODEL,
-        input=query,
-    )
-    query_embedding = query_embedding_response["data"][0]["embedding"]
-    strings_and_relatednesses = [
-        (row["text"], relatedness_fn(query_embedding, row["embedding"]))
-        for i, row in df.iterrows()
-    ]
-    strings_and_relatednesses.sort(key=lambda x: x[1], reverse=True)
-    strings, relatednesses = zip(*strings_and_relatednesses)
-    return strings[:top_n], relatednesses[:top_n]
+# def strings_ranked_by_relatedness(
+#     query: str,
+#     df: pd.DataFrame,
+#     relatedness_fn=lambda x, y: 1 - spatial.distance.cosine(x, y),
+#     top_n: int = 100
+# ) -> tuple[list[str], list[float]]:
+#     """Returns a list of strings and relatednesses, sorted from most related to least."""
+#     query_embedding_response = openai.Embedding.create(
+#         model=EMBEDDING_MODEL,
+#         input=query,
+#     )
+#     query_embedding = query_embedding_response["data"][0]["embedding"]
+#     strings_and_relatednesses = [
+#         (row["text"], relatedness_fn(query_embedding, row["embedding"]))
+#         for i, row in df.iterrows()
+#     ]
+#     strings_and_relatednesses.sort(key=lambda x: x[1], reverse=True)
+#     strings, relatednesses = zip(*strings_and_relatednesses)
+#     return strings[:top_n], relatednesses[:top_n]
 
 def num_tokens(text: str, model: str = GPT_MODEL) -> int:
     """Return the number of tokens in a string."""
@@ -57,19 +57,19 @@ def query_message(
     token_budget: int
 ) -> str:
     """Return a message for GPT, with relevant source texts pulled from a dataframe."""
-    strings, relatednesses = strings_ranked_by_relatedness(query, df)
-    introduction = 'The articles below have context you can use about Exporting Goods to answer the subsequent question. Please provide sources. Write wikipedia sources format with url https://en.wikipedia.org/wiki/. If the answer cannot be found, just use your own knowledge instead.'
+    # strings, relatednesses = strings_ranked_by_relatedness(query, df)
+    introduction = 'I want you to act as a reliable source of information on exporting international shipping prices. Assume that I am a small business owner who plans to expand my operations globally. Provide me with a detailed breakdown of the factors influencing international shipping costs, such as distance, weight, dimensions, shipping method, and any additional fees or surcharges. Additionally, offer advice on how to minimize shipping expenses, negotiate favorable rates with shipping carriers, and ensure a smooth and efficient shipping process. Feel free to share any relevant insights, best practices, or case studies that can help me make informed decisions and optimize my international shipping strategy.'
     question = f"\n\nQuestion: {query}"
     message = introduction
-    for string in strings:
-        next_article = f'\n\nWikipedia article section:\n"""\n{string}\n"""'
-        if (
-            num_tokens(message + next_article + question, model=model)
-            > token_budget
-        ):
-            break
-        else:
-            message += next_article
+    # for string in strings:
+    #     next_article = f'\n\nWikipedia article section:\n"""\n{string}\n"""'
+    #     if (
+    #         num_tokens(message + next_article + question, model=model)
+    #         > token_budget
+    #     ):
+    #         break
+    #     else:
+    #         message += next_article
     return message + question
 
 def query_context(query: str, filepath: str) -> str:
@@ -91,7 +91,7 @@ def query_context(query: str, filepath: str) -> str:
 def toucan_ask(
     query: str,
     locale: str = None,
-    df: pd.DataFrame = df,
+    df: pd.DataFrame = None,
     model: str = GPT_MODEL,
     token_budget: int = 4096,
 ):
