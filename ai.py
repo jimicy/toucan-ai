@@ -13,7 +13,7 @@ openai.api_key = OPEN_API_KEY
 
 # models
 EMBEDDING_MODEL = "text-embedding-ada-002"
-GPT_MODEL = "gpt-3.5-turbo-16k-0613"
+GPT_MODEL = "gpt-3.5-turbo-0125"
 MAX_TOKENS_CONTEXT = 16385
 
 # download pre-chunked text and pre-computed embeddings
